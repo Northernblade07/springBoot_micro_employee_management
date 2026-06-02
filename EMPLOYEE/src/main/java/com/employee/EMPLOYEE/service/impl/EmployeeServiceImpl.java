@@ -6,10 +6,12 @@ import com.employee.EMPLOYEE.repository.EmployeeRepository;
 import com.employee.EMPLOYEE.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
 
+@Service
 @RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
 
@@ -45,14 +47,22 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public EmployeeDto updateEmployee(Long id, EmployeeDto employeeDto) {
-        if(!Objects.equals(employeeDto.getId(), id) || id == null){
+        if(id == null){
             throw new RuntimeException("please provide proper id , there can be mismatch");
         }
+        Employee employee = employeeRepository.findById(id).orElseThrow(()->new RuntimeException("no user exists with this is id"));
+//        Employee entity = modelMapper.map(employeeDto , Employee.class);
+//        Employee updatedEmployee = employeeRepository.save(entity);
+//
+//        return modelMapper.map(updatedEmployee , EmployeeDto.class);
 
-        Employee entity = modelMapper.map(employeeDto , Employee.class);
-        Employee updatedEmployee = employeeRepository.save(entity);
+        employee.setName(employeeDto.getName());
+        employee.setEmpCode(employeeDto.getEmpCode());
+        employee.setCompanyName(employeeDto.getCompanyName());
+        employee.setEmpEmail(employeeDto.getEmpEmail());
 
-        return modelMapper.map(updatedEmployee , EmployeeDto.class);
+        employeeRepository.save(employee);
+        return modelMapper.map(employee , EmployeeDto.class);
 
     }
 
