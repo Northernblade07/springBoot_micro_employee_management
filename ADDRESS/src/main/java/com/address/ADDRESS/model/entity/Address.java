@@ -14,6 +14,7 @@ public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false)
     private Long empId;
     private String street;
     private String city;
@@ -21,6 +22,7 @@ public class Address {
     private String country;
     private Long pinCode;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private AddressType addressType;
 

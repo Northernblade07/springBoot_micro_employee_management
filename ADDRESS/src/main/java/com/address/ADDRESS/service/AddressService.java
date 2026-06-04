@@ -7,13 +7,17 @@ import java.util.List;
 
 public interface AddressService {
 
-    AddressDto saveAddress(AddressRequest addressRequest);
+    List<AddressDto> saveAddress(AddressRequest addressRequest);
 
-    AddressDto updateAddress(AddressRequest addressRequest);
+    List<AddressDto> updateAddress(AddressRequest addressRequest);
 
     void deleteAddress(Long id);
 
     AddressDto getSingleAddress(Long id);
 
     List<AddressDto> getAllAddress();
+
+    void deleteAllByEmpId(Long empId);
+
+    List<AddressDto> getAddressByEmployeeId(Long empId);
 }
