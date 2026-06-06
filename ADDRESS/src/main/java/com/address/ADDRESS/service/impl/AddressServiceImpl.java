@@ -1,10 +1,12 @@
 package com.address.ADDRESS.service.impl;
 
+import com.address.ADDRESS.client.EmployeeClient;
 import com.address.ADDRESS.exception.BadRequestException;
 import com.address.ADDRESS.exception.ResourceNotFoundException;
 import com.address.ADDRESS.model.dto.AddressDto;
 import com.address.ADDRESS.model.dto.AddressRequest;
 import com.address.ADDRESS.model.dto.AddressRequestDto;
+import com.address.ADDRESS.model.dto.EmployeeDto;
 import com.address.ADDRESS.model.entity.Address;
 import com.address.ADDRESS.repository.AddressRepository;
 import com.address.ADDRESS.service.AddressService;
@@ -25,10 +27,15 @@ public class AddressServiceImpl implements AddressService {
 
     private final AddressRepository addressRepository;
     private final ModelMapper modelMapper;
+    private final EmployeeClient employeeClient;
+
     @Override
     public List<AddressDto> saveAddress(AddressRequest addressRequest) {
 
-
+        EmployeeDto employee =  employeeClient.getSingleEmployee(addressRequest.getEmpId());
+        if(employee==null){
+            throw new ResourceNotFoundException("Employee not found with id:"+addressRequest.getEmpId());
+        }
         List<Address> ListToSave = new ArrayList<>();
         for (AddressRequestDto addressRequestDto : addressRequest.getAddressRequestDtoList()){
 
@@ -46,6 +53,11 @@ public class AddressServiceImpl implements AddressService {
     public List<AddressDto> updateAddress(AddressRequest addressRequest) {
         if(addressRequest.getEmpId() == null){
             throw new BadRequestException("Employee id cannot be null");
+        }
+
+        EmployeeDto employee = employeeClient.getSingleEmployee(addressRequest.getEmpId());
+        if (employee==null){
+            throw new ResourceNotFoundException("Employee not found with id:"+addressRequest.getEmpId());
         }
 
         List<Address> existingAddresses = addressRepository.findAllByEmpId(addressRequest.getEmpId());

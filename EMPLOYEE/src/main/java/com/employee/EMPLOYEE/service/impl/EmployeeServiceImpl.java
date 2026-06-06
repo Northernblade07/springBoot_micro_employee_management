@@ -1,24 +1,31 @@
 package com.employee.EMPLOYEE.service.impl;
 
+import com.employee.EMPLOYEE.client.AddressClient;
 import com.employee.EMPLOYEE.exception.BadRequestException;
 import com.employee.EMPLOYEE.exception.ResourceNotFound;
+import com.employee.EMPLOYEE.model.dto.AddressDto;
 import com.employee.EMPLOYEE.model.dto.EmployeeDto;
 import com.employee.EMPLOYEE.model.entity.Employee;
 import com.employee.EMPLOYEE.repository.EmployeeRepository;
 import com.employee.EMPLOYEE.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final ModelMapper modelMapper;
+    private final AddressClient addressClient;
+
     @Override
     public EmployeeDto saveEmployee(EmployeeDto employeeDto) {
         if (employeeDto.getId() != null) {
@@ -44,7 +51,15 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public EmployeeDto getSingleEmployee(Long id) {
         Employee employee = employeeRepository.findById(id).orElseThrow(()->new ResourceNotFound("No employee found"));
-        return modelMapper.map(employee  , EmployeeDto.class);
+        List<AddressDto> address = new ArrayList<>();
+       try {
+           address = addressClient.getAddressByEmployeeId(id);
+       } catch (Exception e){
+           log.info("no address for this employe with id:"+id);
+       }
+       EmployeeDto response =  modelMapper.map(employee  , EmployeeDto.class);
+       response.setAddress(address);
+       return response;
     }
 
     @Override
@@ -53,10 +68,6 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new BadRequestException("please provide proper id , there can be mismatch");
         }
         Employee employee = employeeRepository.findById(id).orElseThrow(()->new ResourceNotFound("no user exists with this id:"+id));
-//        Employee entity = modelMapper.map(employeeDto , Employee.class);
-//        Employee updatedEmployee = employeeRepository.save(entity);
-//
-//        return modelMapper.map(updatedEmployee , EmployeeDto.class);
 
         employee.setName(employeeDto.getName());
         employee.setEmpCode(employeeDto.getEmpCode());
@@ -74,7 +85,22 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (employees.isEmpty()){
             throw new ResourceNotFound("no employee found");
         }
-        return employees.stream().map( e -> modelMapper.map(e , EmployeeDto.class)).toList();
+
+        List<EmployeeDto> employeeDtos=  employees.stream().map( e -> modelMapper.map(e , EmployeeDto.class)).toList();
+
+        List<EmployeeDto> response = new ArrayList<>();
+        for (EmployeeDto dto : employeeDtos){
+            try{
+                List<AddressDto> address = addressClient.getAddressByEmployeeId(dto.getId());
+                dto.setAddress(address);
+            } catch (Exception e){
+                log.info("no address for employe with id:"+dto.getId());
+            }
+            response.add(dto);
+        }
+
+        return response;
+
     }
 
 

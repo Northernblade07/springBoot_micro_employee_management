@@ -1,8 +1,6 @@
-package com.employee.EMPLOYEE.model.dto;
+package com.address.ADDRESS.model.dto;
 
 import lombok.*;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -16,6 +14,5 @@ public class EmployeeDto {
     private String empEmail;
     private String empCode;
     private String companyName;
-    private List<AddressDto> address;
 
 }
