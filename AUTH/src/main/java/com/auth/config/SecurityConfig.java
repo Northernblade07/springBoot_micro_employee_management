@@ -32,7 +32,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http){
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req->{
-                    req.requestMatchers("/api/v1/auth/register").permitAll();
+                    req.requestMatchers("/api/v1/auth/register", "/api/v1/auth/generateToken").permitAll();
                     req.anyRequest().authenticated();
                 })
                 .userDetailsService(userDetailsService())

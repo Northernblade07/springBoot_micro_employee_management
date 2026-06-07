@@ -34,12 +34,17 @@ public class UserController {
     @PostMapping("/generateToken")
     public ResponseEntity<JwtTokenResponse> generateToken(@RequestBody LoginRequest loginRequest){
 
-        Authentication authentication =  authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail() , loginRequest.getPassword()));
+        try {
 
-        if (authentication.isAuthenticated()){
-            return ResponseEntity.ok(userService.generateToken(loginRequest.getEmail()));
-        } else {
-            throw new BadRequestException("Invalid email or password");
+            Authentication authentication =  authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail() , loginRequest.getPassword()));
+
+            if (authentication.isAuthenticated()){
+                return ResponseEntity.ok(userService.generateToken(loginRequest.getEmail()));
+            } else {
+                throw new BadRequestException("Invalid email or password");
+            }
+        } catch (Exception e){
+            throw new BadRequestException("Invalid Credentials");
         }
     }
 
